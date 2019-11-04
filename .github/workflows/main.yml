@@ -1,0 +1,46 @@
+name: Test, build, and push
+
+on:
+  pull_request:
+    branches: 
+      - master
+    tags:
+      - 'v*.*.*'
+  push:
+    branches: 
+      - master
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: luke142367/Docker-Lint-Action@v0.1.0
+  build:
+    needs: [lint]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v1
+      - name: Setup docker buildx
+        uses: crazy-max/ghaction-docker-buildx@v0.1.0
+      - name: Run docker login
+        run: echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login --username "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+      - name: Generate tag name
+        id: tag
+        uses: actions/github-script@0.2.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const registry = "${{ secrets.REGISTRY_USERNAME }}";
+            const tag = context.payload.ref.replace(/^refs\/[a-zA-Z]+\//, '');
+            return `${registry}/unifi:${tag}`;
+      - name: Run docker buildx
+        run: |-
+          docker buildx build \
+            --platform linux/amd64,linux/arm64,linux/s390x \
+            --output "type=image,push=true" \
+            --tag "${{ steps.tag.outputs.result }}" \
+           .
