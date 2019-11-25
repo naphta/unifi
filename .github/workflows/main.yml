@@ -27,7 +27,7 @@ jobs:
       - name: Setup docker buildx
         uses: crazy-max/ghaction-docker-buildx@v0.1.0
       - name: Run docker login
-        run: echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login docker.pkg.github.com --username naphta --username naphta
+        run: echo "${{ secrets.DOCKER_REPOSITORY_TOKEN }}" | docker login docker.pkg.github.com --username naphta --username naphta --password-stdin
       - name: Generate tag name
         id: tag
         uses: actions/github-script@0.2.0
