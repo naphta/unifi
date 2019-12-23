@@ -1,6 +1,6 @@
 # UniFi Controller on Docker
 ![Build status](https://github.com/naphta/unifi/workflows/Test,%20build,%20and%20push/badge.svg)
-![Docker Pulls](https://img.shields.io/docker/pulls/jakehilluk/unifi?style=flat-square)
+![Docker Pulls](https://img.shields.io/docker/pulls/jakehilluk/unifi?style=plastic)
 
 ## Why not jacobalberty/unifi
 
