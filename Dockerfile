@@ -4,13 +4,14 @@ LABEL maintainer="Jake Hill <jake@naphta.uk>"
 
 RUN set -ex && \
     apt-get update && \
-    apt-get install -y \
+    apt-get install -y --no-install-recommends \
         ca-certificates \
         apt-transport-https \
         gpg \
         unzip \
         ansible \
-        python-pip
+        python-pip && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /etc/unifi \
 &&  mkdir -p /etc/unifi/data \
