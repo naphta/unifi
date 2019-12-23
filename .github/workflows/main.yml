@@ -1,14 +1,7 @@
 name: Test, build, and push
 
 on:
-  pull_request:
-    branches: 
-      - master
-    tags:
-      - 'v*.*.*'
   push:
-    branches: 
-      - master
     tags:
       - 'v*.*.*'
 
@@ -34,14 +27,14 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const tag = context.payload.ref.replace(/^refs\/[a-zA-Z]+\//, '');
+            const tag = context.payload.ref.replace(/^refs\/[a-zA-Z]+\/v/, '');
             return `${tag}`;
       - name: Run docker buildx (
         run: |-
           docker buildx build \
             --platform linux/amd64,linux/arm64,linux/s390x \
             --output "type=image,push=true" \
-            --tag "naphta/unifi:${{ steps.tag.outputs.result }}" \
+            --tag "docker.pkg.github.com/naphta/unifi:${{ steps.tag.outputs.result }}" \
             --build-arg unifi_version="${{ steps.tag.outputs.result }}" \
             --build-arg self_contained="False" \
             --file Dockerfile.buildx \
@@ -51,7 +44,7 @@ jobs:
           docker buildx build \
             --platform linux/amd64,linux/arm64,linux/s390x \
             --output "type=image,push=true" \
-            --tag "naphta/unifi:${{ steps.tag.outputs.result }}-all-in-one" \
+            --tag "docker.pkg.github.com/naphta/unifi:${{ steps.tag.outputs.result }}-all-in-one" \
             --build-arg unifi_version="${{ steps.tag.outputs.result }}" \
             --build-arg self_contained="True" \
             --file Dockerfile.buildx \
