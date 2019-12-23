@@ -20,7 +20,7 @@ jobs:
       - name: Setup docker buildx
         uses: crazy-max/ghaction-docker-buildx@v0.1.0
       - name: Run docker login
-        run: echo "${{ secrets.DOCKER_REPOSITORY_TOKEN }}" | docker login docker.pkg.github.com --username naphta --username naphta --password-stdin
+        run: echo "${{ secrets.DOCKER_REPOSITORY_TOKEN }}" | docker login --username "${{ secrets.DOCKER_REPOSITORY_USERNAME }}" --password-stdin
       - name: Generate tag name
         id: tag
         uses: actions/github-script@0.2.0
@@ -34,7 +34,7 @@ jobs:
           docker buildx build \
             --platform linux/amd64,linux/arm64,linux/s390x \
             --output "type=image,push=true" \
-            --tag "docker.pkg.github.com/naphta/unifi:${{ steps.tag.outputs.result }}" \
+            --tag "jakehilluk/unifi:v${{ steps.tag.outputs.result }}" \
             --build-arg unifi_version="${{ steps.tag.outputs.result }}" \
             --build-arg self_contained="False" \
             --file Dockerfile.buildx \
@@ -44,7 +44,7 @@ jobs:
           docker buildx build \
             --platform linux/amd64,linux/arm64,linux/s390x \
             --output "type=image,push=true" \
-            --tag "docker.pkg.github.com/naphta/unifi:${{ steps.tag.outputs.result }}-all-in-one" \
+            --tag "jakehilluk/unifi:v${{ steps.tag.outputs.result }}-all-in-one" \
             --build-arg unifi_version="${{ steps.tag.outputs.result }}" \
             --build-arg self_contained="True" \
             --file Dockerfile.buildx \

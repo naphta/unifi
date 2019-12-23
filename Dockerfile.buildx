@@ -9,9 +9,9 @@ RUN set -ex && \
         ca-certificates \
         apt-transport-https \
         gpg \
+        gpg-agent \
         unzip \
-        ansible \
-        python-pip && \
+        ansible && \
     rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /etc/unifi \
