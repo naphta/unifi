@@ -23,7 +23,7 @@ COPY build.yaml /etc/unifi
 COPY entrypoint.sh /
 COPY system.properties.j2 /etc/unifi/
 
-ARG self_contained=true
+ARG self_contained=False
 ARG unifi_version
 
 RUN ansible-playbook -i localhost /etc/unifi/build.yaml --extra-vars unifi_version=$unifi_version
