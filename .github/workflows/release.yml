@@ -1,19 +1,12 @@
-name: Test, build, and push
-
 on:
   push:
     tags:
       - 'v*.*.*'
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: luke142367/Docker-Lint-Action@v0.1.0
   build:
-    needs: [lint]
-    runs-on: ubuntu-latest
+    name: build
+    runs-on: [ubuntu-latest]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v1
@@ -29,7 +22,7 @@ jobs:
           script: |
             const tag = context.payload.ref.replace(/^refs\/[a-zA-Z]+\/v/, '');
             return `${tag}`;
-      - name: Run docker buildx (
+      - name: Run docker buildx (Standalone)
         run: |-
           docker buildx build \
             --platform linux/amd64,linux/arm64,linux/s390x \
@@ -49,3 +42,18 @@ jobs:
             --build-arg self_contained="True" \
             --file Dockerfile.buildx \
             .
+  release:
+    needs: [build]
+    runs-on: [ubuntu-latest]
+    steps:
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v0.1.0
+        with:
+          body: |-
+            docker pull jakehilluk/unifi:v${{ steps.tag.outputs.result }}
+            docker pull jakehilluk/unifi:v${{ steps.tag.outputs.result }}-all-in-one 
+          body-path: https://community.ui.com/releases?q=${{ steps.tag.outputs.result }}
+          name: "UniFi v${{ steps.tag.outputs.result }}"
+          draft: false
+
+    
