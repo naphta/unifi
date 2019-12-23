@@ -1,0 +1,78 @@
+---
+- hosts: localhost
+  vars:
+    ansible_connection: local
+  tasks:
+
+    - set_fact:
+        self_contained: "{{ (lookup('env', 'self_contained') | bool) | default(False) }}"
+
+    - name: Install MongoDB
+      block:
+
+      - name: Add key for MongoDB repository
+        apt_key:
+          url: https://www.mongodb.org/static/pgp/server-4.2.asc
+          state: present
+
+      - name: Add repository for MongoDB
+        apt_repository:
+          repo: "deb [ arch=amd64,arm64,s390x ] http://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse"
+          update_cache: yes
+
+      - name: Install MongoDB
+        apt:
+          name: mongodb-org
+          state: present
+
+      - name: Create MongoDB data directory
+        file:
+          path: /data/db
+          state: directory
+
+      when: self_contained
+
+    - name: Install UniFi dependencies
+      apt:
+        name:
+          - openjdk-8-jre-headless
+        state: present
+
+    - name: Create UniFi directories
+      file:
+        state: directory
+        path: "{{ item }}"
+        owner: root
+        group: root
+      loop:
+        - /etc/unifi
+        - /etc/unifi/cert
+        - /usr/lib/unifi
+        - /var/lib/unifi
+        - /var/log/unifi
+        - /var/run/unifi
+
+    - name: Get UniFi
+      unarchive:
+        src: https://dl.ubnt.com/unifi/{{ unifi_version }}/UniFi.unix.zip
+        remote_src: yes
+        dest: /etc/unifi
+        owner: root
+        group: root
+        creates: /etc/unifi/UniFi
+      register: download_unifi
+
+    - name: Move UniFi from unzipped directory
+      shell:
+        cmd: mv /etc/unifi/UniFi/* /etc/unifi
+
+    - name: Delete UniFi archive directory
+      file:
+        path: /etc/unifi/UniFi
+        state: absent
+
+    - name: Template system.properties
+      template:
+        src: /etc/unifi/system.properties.j2
+        dest: /etc/unifi/data/system.properties
+...

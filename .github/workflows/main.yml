@@ -35,11 +35,15 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const tag = context.payload.ref.replace(/^refs\/[a-zA-Z]+\//, '');
-            return `naphta/unifi:${tag}`;
+            var output = {};
+            output.image_tag = `naphta/unifi:${tag}`;
+            output.version = `${tag}`;
+            return output;
       - name: Run docker buildx
         run: |-
           docker buildx build \
             --platform linux/amd64,linux/arm64,linux/s390x \
             --output "type=image,push=true" \
-            --tag "${{ steps.tag.outputs.result }}" \
+            --tag "${{ steps.tag.outputs.image_tag }}" \
+            --build-arg unifi_version="${{ steps.tag.outputs.version }}"
            .

@@ -1,0 +1,8 @@
+{%- if not self_contained -%}
+db.mongo.local={{ self_contained | ternary("true", "false") }}
+{%- raw %}
+db.mongo.uri={{ mongodb_uri }}
+statdb.mongo.uri={{ mongodb_stats_uri }}
+unifi.db.name={{ mongodb_unifi_db }}
+{%- endraw -%}
+{%- endif %}
