@@ -10,12 +10,16 @@ jobs:
     name: build
     runs-on: [ubuntu-latest]
     steps:
+      
       - name: Checkout repository
         uses: actions/checkout@v1
+      
       - name: Setup docker buildx
         uses: crazy-max/ghaction-docker-buildx@v0.1.0
+      
       - name: Run docker login
         run: echo "${{ secrets.DOCKER_REPOSITORY_TOKEN }}" | docker login --username "${{ secrets.DOCKER_REPOSITORY_USERNAME }}" --password-stdin
+      
       - name: Generate tag name
         id: tag
         uses: actions/github-script@0.2.0
@@ -24,6 +28,7 @@ jobs:
           script: |
             const tag = context.payload.ref.replace(/^refs\/[a-zA-Z]+\/v/, '');
             return `${tag}`;
+
       - name: Run docker buildx (Standalone)
         run: |-
           docker buildx build \
@@ -44,18 +49,18 @@ jobs:
             --build-arg self_contained="True" \
             --file Dockerfile.buildx \
             .
+  
   release:
     needs: [build]
     runs-on: [ubuntu-latest]
     steps:
-      - name: Create GitHub release
-        uses: softprops/action-gh-release@v0.1.0
+      
+      - name: Automatic Releases
+        uses: marvinpinto/action-automatic-releases@v0.2.2
         with:
-          body: |-
-            docker pull jakehilluk/unifi:v${{ steps.tag.outputs.result }}
-            docker pull jakehilluk/unifi:v${{ steps.tag.outputs.result }}-all-in-one 
-          body-path: https://community.ui.com/releases?q=${{ steps.tag.outputs.result }}
-          name: "UniFi v${{ steps.tag.outputs.result }}"
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          title: "UniFi v${{ steps.tag.outputs.result }}"
+          automatic_release_tag: false
           draft: false
-
+          prerelease: false
     
